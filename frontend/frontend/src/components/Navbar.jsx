@@ -1,4 +1,4 @@
-import React from 'react';
+
 import logo from '../assets/logo.jpg'; 
 import addcartlogo from '../assets/addcartlogo.jpg';
 
@@ -19,7 +19,7 @@ function Navbar({onAddProductClick}) {
             <button onClick={onAddProductClick}  className=" flex justify-center bg-blue-500 p-4 m-4 text-white font-semibold py-1 px-3 rounded md:m-0 ">
                
                 Track New Product 
-                  <img src={addcartlogo}   className="h-7 w-15.2" alt="cartlogo" />
+                  <img src={addcartlogo}   className="h-7 w-15" alt="cartlogo" />
             </button>
            
         </div>

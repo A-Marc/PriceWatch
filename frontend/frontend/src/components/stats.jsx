@@ -1,6 +1,4 @@
 // src/components/StatsSummary.jsx
-
-import React from 'react';
 function StatsSummary({ totalItems, avgChange }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -15,9 +13,9 @@ function StatsSummary({ totalItems, avgChange }) {
             View History
           </p>
         </div>
-        {/* <div className="text-green-600 font-semibold bg-green-100 px-3 py-1 rounded-full">
+        <div className="text-green-600 font-semibold bg-green-100 px-3 py-1 rounded-full">
           +5.2%
-        </div> */}
+        </div>
       </div>
 
       {/* Average Price Change */}
@@ -28,7 +26,7 @@ function StatsSummary({ totalItems, avgChange }) {
           </h3>
           <p
             className={`text-2xl font-bold mt-1 ${
-              avgChange >= 0 ? "text-red-600" : "text-green-500"
+              avgChange >= 0 ? "text-green-600" : "text-red-500"
             }`}
           >
             {avgChange}%

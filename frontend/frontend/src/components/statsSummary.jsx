@@ -1,6 +1,4 @@
 // src/components/StatsSummary.jsx
-
-import React from 'react';
 function StatsSummary({ totalItems, avgChange }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">

@@ -42,8 +42,8 @@ const handleAddProduct = (product) => {
           </div>
         </div>
       )}
-<div className="w-full px-4 sm:px-6 lg:px-8 mt-8 space-y-4">
 
+<div className="max-w-md mx-auto mt-8 space-y-4">
   {/* Stats Summary at the top */}
   {/* <StatsSummary totalItems={products.length} avgChange={-1.5} /> */}
 
@@ -67,7 +67,7 @@ const handleAddProduct = (product) => {
     return (
       <div
         key={index}
-         className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center"
+        className="bg-white p-4 rounded-2xl shadow-md flex justify-between items-center"
       >
         <div>
           <h3 className="text-gray-800 font-semibold">{product.name}</h3>
