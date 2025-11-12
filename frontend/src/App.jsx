@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import AddProduct from "./components/addProductForm";
 import StatsSummary from "./components/statsSummary";
 import { Line } from "react-chartjs-2";
-import API from "../../backend/api";
+import API from "./api";
 
 
 
