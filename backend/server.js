@@ -22,13 +22,16 @@ app.post('/products', (req, res) => {
     return res.status(400).json({ message: "Name, URL, and targetPrice are required!" });
   }
 
-  const newProduct = {
-    id: products.length + 1,
-    name,
-    url,
-    targetPrice,
-    currentPrice: currentPrice || null // optional if user doesn’t provide it
-  };
+const newProduct = {
+  id: products.length + 1,
+  name,
+  url,
+  targetPrice,
+  currentPrice: currentPrice || null,
+  change: 0,       // start at 0% change
+  history: []      // always start with empty history
+};
+
 
   products.push(newProduct);
   res.status(201).json(newProduct);

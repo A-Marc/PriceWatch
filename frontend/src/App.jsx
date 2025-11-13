@@ -90,7 +90,8 @@ function App() {
             ...p,
             price: Number(newPrice),
             change: roundedChange,
-            history: [...p.history, newHistoryEntry], // append new history
+           history: [...(p.history || []), newHistoryEntry],
+
           };
         }
         return p;
@@ -99,28 +100,36 @@ function App() {
   };
 
 
-  function handleAddProduct(product) {
+  const handleAddProduct = async (product) => {
     const formattedProduct = {
       name: product.name,
       url: product.url,
       targetPrice: Number(product.targetPrice),
       currentPrice: Number(product.currentPrice),
-      change: 0, // initial change
+      change: 1, // initial change
       history: [], // empty initially
     };
-    
-    setProducts([...products, formattedProduct]);
+  try{
+    const res=await API.post('/products',formattedProduct)
+    setProducts([...products, res.data])
     setShowForm(false);
-    console.log("Tracked Product:", formattedProduct);
-  }
+   
 
-  const totalChange = products.reduce(
-    (acc, product) => acc + product.change,
-    0
-  );
-  const avgChange = products.length
-    ? Math.round((totalChange / products.length) * 10) / 10
-    : 0;
+
+  }catch(err){
+    console.error("err")
+  }
+    
+
+  }
+const totalChange = products.reduce(
+  (acc, product) => acc + (Number(product.change) || 0),
+  0
+);
+
+const avgChange = products.length
+  ? Math.round((totalChange / products.length) * 10) / 10
+  : 0;
 
 
       // ################  //DARKMODE
