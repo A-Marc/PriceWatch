@@ -149,6 +149,21 @@ const avgChange = products.length
 
 
 
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await API.get("/products");
+      setProducts(res.data); // ✅ populate state from backend
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+    }
+  };
+
+  fetchProducts();
+}, []);
+
+
+
   return (
    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
       <Navbar
