@@ -3,4 +3,9 @@ make the update price to update from backend also make the history what ever it 
 
 
 
-line 312
+line 312,check twice
+
+change the update price to update item or edit item and
+make the navbar sticky
+
+make the product update from realurl by using fetch
