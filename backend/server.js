@@ -210,27 +210,38 @@ app.post("/signup", async (req, res) => {
     });
   }      
 });
+
 app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // 1. Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() }); // Added .toLowerCase() for safety
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // 2. Check if password is correct (using the helper we added to the model)
+    // --- DEBUG LOGS START ---
+    console.log("DEBUG: Login attempt for:", email);
+    console.log("DEBUG: Password from frontend:", password);
+    console.log("DEBUG: Hashed password in DB:", user.password);
+    // --- DEBUG LOGS END ---
+
+    // 2. Check if password is correct
     const isMatch = await user.comparePassword(password);
+    
+    console.log("DEBUG: Does Bcrypt match?:", isMatch);
+
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-    // 3. Create a token (The "VIP Pass")
+    // 3. Create a token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
     res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
-} catch (err) {
-    console.error("LOGIN ERROR:", err); // This prints the real error to your terminal
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ message: "Server error", error: err.message });
-} 
+  } 
 });
+
 
 
 const PORT = process.env.PORT || 5000;
