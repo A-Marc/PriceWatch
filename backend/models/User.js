@@ -26,13 +26,13 @@ const UserSchema = new mongoose.Schema({
 });
 
 // 🔥 ENCRYPTION: This runs automatically before saving a user
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+// 🔥 ENCRYPTION: Simplified version
+UserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   
-  // Scramble the password so it's not readable in the database
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
+  // No next() needed here in modern Mongoose async hooks
 });
 
 // 🛠️ HELPER: Function to check if password is correct during login
