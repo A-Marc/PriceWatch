@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import { Toaster } from 'react-hot-toast'; // 1. Import it
+import toast from 'react-hot-toast'
 
 import StatsSummary from "./components/statsSummary";
 // Change these to lowercase to match your actual files
@@ -44,6 +46,25 @@ function App() {
 
   // Auth State
 
+
+  // This helper returns 'true' if the user is logged in, 
+// and 'false' (plus a toast) if they are a guest.
+const checkAuth = () => {
+  if (!token) {
+    toast.error("Please login or signup to perform this action", {
+      icon: '🚫',
+      duration: 3000,
+      style: {
+        borderRadius: '10px',
+        background: theme === 'dark' ? '#1f2937' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#1f2937',
+        border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
+      },
+    });
+    return false;
+  }
+  return true;
+};
 const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userName"); // Clear it on logout!
@@ -66,11 +87,9 @@ const handleLogout = () => {
   };
 
   const handleDeleteProduct = async (id) => {
-    if (!token) {
-      alert("Guest Mode: You cannot delete sample products. Please login!");
-      return;
-    }
-    if (!window.confirm("Are you sure?")) return;
+if (!checkAuth()) return; // Stop here if guest
+
+  if (!window.confirm("Are you sure?")) return;
     try {
       await API.delete(`/products/${id}`); 
       setProducts((prev) => prev.filter((p) => p._id !== id));
@@ -81,10 +100,13 @@ const handleLogout = () => {
   };
 
   const handleAddProduct = async (product) => {
-    if (!token) {
-      alert("Guest Mode: Please login or sign up to track your own products!");
-      return;
-    }
+if (!token) {
+    toast.error("Guest Mode: Please login to save products!", {
+      icon: '🔒',
+      style: { borderRadius: '10px', background: '#333', color: '#fff' },
+    });
+    return;
+  }
     const formattedProduct = { ...product, targetPrice: Number(product.targetPrice), currentPrice: Number(product.currentPrice), change: 0, history: [] };
     try {
       const res = await API.post("/products", formattedProduct);
@@ -93,14 +115,12 @@ const handleLogout = () => {
     } catch (err) { console.error(err); }
   };
 
-  const handleEditProduct = (product) => {
-        if (!token) {
-      alert("Guest Mode: Please login or sign up to track your own products!");
-      return;
-    }
+const handleEditProduct = (product) => {
+  if (checkAuth()) {
     setEditingProduct(product);
     setShowForm(true);
-  };
+  }
+};
 
   const toggleTheme = () => setTheme((prev) => (prev === "light" ? "dark" : "light"));
 
@@ -145,13 +165,9 @@ useEffect(() => {
 <Navbar 
   theme={theme} 
   toggleTheme={toggleTheme} 
-  onAddProductClick={() => {
-    if (!token) {
-      alert("Guest Mode: Please login to add your own products!");
-    } else {
-      setShowForm(true);
-    }
-  }}
+ onAddProductClick={() => {
+  if (checkAuth()) setShowForm(true);
+}}
   onLogout={handleLogout} 
   userName={userName} 
   token={token} // 👈 Add this so Navbar knows if someone is logged in
@@ -209,7 +225,9 @@ useEffect(() => {
 
   return  (
   <Router>
+    <Toaster position="top-center" reverseOrder={false} />
     <Routes>
+      
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login setToken={(data) => {
           localStorage.setItem("token", data.token);
