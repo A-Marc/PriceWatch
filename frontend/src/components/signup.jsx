@@ -99,7 +99,10 @@ const Signup = () => {
             className={`w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-2xl font-bold transition-all transform active:scale-[0.98] shadow-lg shadow-blue-500/25 flex justify-center items-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             {loading ? (
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span className="text-sm">Signing in...</span>
+              </div>
             ) : (
               "Get Started"
             )}
