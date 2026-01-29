@@ -1,8 +1,10 @@
 const express = require('express');
 const app = express();
 const cors=require('cors')
+const jwt = require('jsonwebtoken'); 
 const connectDB=require('./config/db')
-const product=require('./models/product')
+const Product=require('./models/product')
+const User=require("./models/User")
 
 require('dotenv').config();
 
@@ -18,11 +20,21 @@ app.use(cors());
 connectDB();
 
 
-// 🟢 GET all products
-// 🟢 GET all products
-app.get('/products', async (req, res) => {
+const auth = (req, res, next) => {
   try {
-    const products = await Product.find(); // fetch all products from MongoDB
+    const token = req.header('Authorization').replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.id; // Store the user ID so the routes can use it
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Access denied. Please log in." });
+  }
+};
+// 🟢 GET all products
+// 🟢 GET all products
+app.get('/products', auth, async (req, res) => {
+  try {
+    const products = await Product.find({owner:req.userId}); // fetch all products from MongoDB
     res.json(products); // send them as JSON
   } catch (err) {
     console.error(err);
@@ -31,9 +43,11 @@ app.get('/products', async (req, res) => {
 });
 
 
+
+
 // 🟡 POST add new product
 // 🟡 POST add new product
-app.post('/products', async (req, res) => {
+app.post('/products', auth,async (req, res) => {
   const { name, url, targetPrice, currentPrice } = req.body;
 
   if (!name || !url || !targetPrice) {
@@ -46,6 +60,7 @@ app.post('/products', async (req, res) => {
       url,
       targetPrice,
       currentPrice: currentPrice || null,
+      owner: req.userId,
       change: 0,   // start at 0% change
       history: []  // empty history
     });
@@ -59,21 +74,25 @@ app.post('/products', async (req, res) => {
 });
 
 
-// 🔵 PUT update product (price or other fields)
-app.put('/products/:id', async (req, res) => {
+// 🔵 PUT update product (Secure Version)
+app.put('/products/:id', auth, async (req, res) => {
   const { id } = req.params;
   const { name, url, targetPrice, currentPrice } = req.body;
 
   try {
-    const product = await Product.findById(id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    // 1. Find the product by ID and ensure it belongs to the logged-in user
+    const product = await Product.findOne({ _id: id, owner: req.userId });
+    
+    if (!product) {
+      return res.status(404).json({ message: "Product not found or unauthorized" });
+    }
 
-    // Update simple fields
+    // 2. Update simple fields if they are provided in the request
     if (name) product.name = name;
     if (url) product.url = url;
     if (targetPrice) product.targetPrice = targetPrice;
 
-    // Update price & history
+    // 3. Update price & history logic
     if (currentPrice && currentPrice > 0) {
       const oldPrice = product.currentPrice || 0;
       const newPrice = Number(currentPrice);
@@ -95,6 +114,7 @@ app.put('/products/:id', async (req, res) => {
       product.currentPrice = newPrice;
     }
 
+    // 4. Save the changes to MongoDB
     const updatedProduct = await product.save();
     res.json(updatedProduct);
 
@@ -103,21 +123,109 @@ app.put('/products/:id', async (req, res) => {
     res.status(500).json({ message: "Failed to update product" });
   }
 });
+// // 🔵 PUT update product (price or other fields)
+// app.put('/products/:id', auth,async (req, res) => {
+//   const { id } = req.params;
+//   const { name, url, targetPrice, currentPrice } = req.body;
+
+//   try {
+//     const product = await Product.findById(id);
+//     if (!product) return res.status(404).json({ message: "Product not found" });
+
+//     // Update simple fields
+//     if (name) product.name = name;
+//     if (url) product.url = url;
+//     if (targetPrice) product.targetPrice = targetPrice;
+
+//     // Update price & history
+//     if (currentPrice && currentPrice > 0) {
+//       const oldPrice = product.currentPrice || 0;
+//       const newPrice = Number(currentPrice);
+
+//       if (oldPrice > 0) {
+//         const percentChange = ((newPrice - oldPrice) / oldPrice) * 100;
+//         const roundedChange = Math.round(percentChange * 10) / 10;
+
+//         product.history.push({
+//           oldPrice,
+//           newPrice,
+//           change: roundedChange,
+//           date: new Date()
+//         });
+
+//         product.change = roundedChange;
+//       }
+
+//       product.currentPrice = newPrice;
+//     }
+
+//     const updatedProduct = await product.save();
+//     res.json(updatedProduct);
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Failed to update product" });
+//   }
+// });
+// // 🔴 DELETE remove product (Secure Version)
+// app.delete('/products/:id', auth, async (req, res) => {
+//   const { id } = req.params;
+
+//   try {
+//     // We search for the product by ID AND ensure the owner is the current user
+//     const deletedProduct = await Product.findOneAndDelete({ 
+//       _id: id, 
+//       owner: req.userId 
+//     });
+
+//     if (!deletedProduct) {
+//       return res.status(404).json({ 
+//         message: "Product not found or you do not have permission to delete it" 
+//       });
+//     }
+
+//     res.json({ message: "Product deleted successfully" });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Failed to delete product" });
+//   }
+// });
 
 
-// 🔴 DELETE remove product
-app.delete('/products/:id', async (req, res) => {
-  const { id } = req.params;
 
+
+app.post("/signup",async(req,res)=>{
+  try{
+    const {name,email,password}=req.body;
+    const user=new User({name,email,password})
+    await user.save();
+    res.status(201).json({message:"user created successfully"})
+  }catch(error){
+    res.status(400).json({error:"email already existed or invalid data"})
+  }      
+})
+
+
+app.post('/login', async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    const { email, password } = req.body;
 
-    res.json({ message: "Product deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to delete product" });
-  }
+    // 1. Find user by email
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // 2. Check if password is correct (using the helper we added to the model)
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+
+    // 3. Create a token (The "VIP Pass")
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+} catch (err) {
+    console.error("LOGIN ERROR:", err); // This prints the real error to your terminal
+    res.status(500).json({ message: "Server error", error: err.message });
+} 
 });
 
 

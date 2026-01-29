@@ -1,23 +1,42 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
 
-const { string, number, date } = require("zod/v4");
-
-const ProductSchema=new mongoose.Schema({
-    name:string,
-    url:string,
-    targetPrice:Number,
-    currentPrice:Number,
-    change:Number,
-    history:[{
-        oldPrice:Number,
-        newPrice:Number,
-        change:Number,
-        date:{
-            type:date,
-            default:Date.now
+const ProductSchema = new mongoose.Schema({
+    name: { 
+        type: String, 
+        required: true 
+    },
+    url: { 
+        type: String, 
+        required: true 
+    },
+    targetPrice: { 
+        type: Number, 
+        required: true 
+    },
+    currentPrice: { 
+        type: Number 
+    },
+    change: { 
+        type: Number, 
+        default: 0 
+    },
+    // This links the product to a specific user
+    owner: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+    },
+    history: [
+        {
+            oldPrice: Number,
+            newPrice: Number,
+            change: Number,
+            date: {
+                type: Date, // Capital 'D' for Mongoose Date type
+                default: Date.now
+            }
         }
-    }
     ]
-})
+});
 
-module.exports=mongoose.model("product",ProductSchema)
+module.exports = mongoose.model("Product", ProductSchema);
