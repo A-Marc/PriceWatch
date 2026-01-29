@@ -168,38 +168,39 @@ useEffect(() => {
 
   // --- RENDER HELPERS ---
 // --- RENDER HELPERS ---
-  const Dashboard = () => (
-    <div className="min-h-screen bg-[#F0F4F8] dark:bg-gray-900 transition-colors duration-300">
-      <Navbar 
-        theme={theme} 
-        toggleTheme={toggleTheme} 
-        onAddProductClick={() => {
-          if (checkAuth()) setShowForm(true);
-        }}
-        onLogout={handleLogout} 
-        userName={userName} 
-        token={token} 
-      />
+ const Dashboard = () => (
+  <div className="min-h-screen bg-[#F0F4F8] dark:bg-gray-900 transition-colors duration-300">
+    <Navbar 
+      theme={theme} 
+      toggleTheme={toggleTheme} 
+      onAddProductClick={() => {
+        if (checkAuth()) setShowForm(true);
+      }}
+      onLogout={handleLogout} 
+      userName={userName} 
+      token={token} 
+    />
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4 overflow-auto">
-          {/* Light: Glassy | Dark: Solid gray-900 */}
-          <div className="bg-white/80 backdrop-blur-2xl dark:bg-gray-900 dark:backdrop-blur-none rounded-[2.5rem] p-6 w-full max-w-sm sm:max-w-md relative shadow-2xl border border-white dark:border-white">
-            <button className="absolute top-5 right-5 text-gray-400 dark:text-gray-200" onClick={() => { setShowForm(false); setEditingProduct(null); }}>✕</button>
-            <AddProduct 
-              handleAddProduct={editingProduct ? handleUpdateProduct : handleAddProduct} 
-              initialData={editingProduct} 
-              isEditing={!!editingProduct} 
-              onClose={() => { setShowForm(false); setEditingProduct(null); }} 
-            />
-          </div>
+    {showForm && (
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4 overflow-auto">
+        <div className="bg-white/80 backdrop-blur-2xl dark:bg-gray-900 dark:backdrop-blur-none rounded-[2.5rem] p-6 w-full max-w-sm sm:max-w-md relative shadow-2xl border border-white dark:border-white">
+          <button className="absolute top-5 right-5 text-gray-400 dark:text-gray-200" onClick={() => { setShowForm(false); setEditingProduct(null); }}>✕</button>
+          <AddProduct 
+            handleAddProduct={editingProduct ? handleUpdateProduct : handleAddProduct} 
+            initialData={editingProduct} 
+            isEditing={!!editingProduct} 
+            onClose={() => { setShowForm(false); setEditingProduct(null); }} 
+          />
         </div>
-      )}
+      </div>
+    )}
 
-      <div className="w-full max-w-3xl mx-auto mt-8 space-y-6 px-4 pb-20">
-        <StatsSummary totalItems={products.length} avgChange={avgChange} />
-        
-        {products.map((product) => {
+    <div className="w-full max-w-3xl mx-auto mt-8 space-y-6 px-4 pb-20">
+      <StatsSummary totalItems={products.length} avgChange={avgChange} />
+      
+      {/* Logic: If products exist, map them. If not, show the Welcome Card */}
+      {products.length > 0 ? (
+        products.map((product) => {
           const isPositive = product.change > 0;
           const isNegative = product.change < 0;
           const changeColor = isPositive 
@@ -209,10 +210,6 @@ useEffect(() => {
             : "bg-slate-100/50 text-slate-500 dark:bg-gray-200 dark:text-gray-700";
 
           return (
-            /* Card Logic: 
-               Light Mode -> bg-white/70 + blur
-               Dark Mode  -> bg-gray-800 (Solid as you had it) 
-            */
             <div key={product._id} className="bg-white/70 backdrop-blur-xl dark:bg-gray-800 dark:backdrop-blur-none p-6 rounded-[2rem] shadow-md border border-white/40 dark:border-none flex flex-col sm:flex-row justify-between items-start sm:items-center w-full transition-all">
               <div className="flex-1">
                 <h3 className="text-slate-800 dark:text-white font-semibold text-lg">{product.name}</h3>
@@ -232,22 +229,44 @@ useEffect(() => {
               </div>
             </div>
           );
-        })}
-      </div>
-
-      {selectedProduct && (
-          <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-2">
-            {/* Modal Logic: Solid for Dark Mode restored */}
-            <div className="bg-white/90 backdrop-blur-2xl dark:bg-gray-800 dark:backdrop-blur-none p-6 rounded-2xl w-full max-w-lg relative overflow-auto max-h-[90vh] border dark:border-none">
-                <button className="absolute top-4 right-4 text-2xl dark:text-white" onClick={() => setSelectedProduct(null)}>✕</button>
-                <h2 className="text-2xl font-bold mb-5 dark:text-white text-center">{selectedProduct.name} History</h2>
-                {/* Your chart code here */}
-            </div>
+        })
+      ) : (
+        /* --- NEW EMPTY STATE CARD --- */
+        <div className="flex flex-col items-center justify-center p-12 text-center bg-white/70 backdrop-blur-xl dark:bg-gray-800 dark:backdrop-blur-none rounded-[3rem] border border-white/40 dark:border-none shadow-xl transition-all">
+          <div 
+            onClick={() => { if (checkAuth()) setShowForm(true); }}
+            className="group cursor-pointer relative w-20 h-20 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 transition-all hover:scale-110 mb-6"
+          >
+            <span className="text-white text-4xl font-light">+</span>
+            <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-20"></div>
           </div>
+
+          <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Your list is empty</h3>
+          <p className="text-slate-500 dark:text-gray-400 max-w-xs">
+            You aren't tracking anything yet! Paste a link to your favorite items to start watching prices.
+          </p>
+          
+          <button 
+            onClick={() => { if (checkAuth()) setShowForm(true); }}
+            className="mt-8 px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25"
+          >
+            Track your first item
+          </button>
+        </div>
       )}
     </div>
-  );
 
+    {selectedProduct && (
+      <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-2">
+        <div className="bg-white/90 backdrop-blur-2xl dark:bg-gray-800 dark:backdrop-blur-none p-6 rounded-2xl w-full max-w-lg relative overflow-auto max-h-[90vh] border dark:border-none">
+          <button className="absolute top-4 right-4 text-2xl dark:text-white" onClick={() => setSelectedProduct(null)}>✕</button>
+          <h2 className="text-2xl font-bold mb-5 dark:text-white text-center">{selectedProduct.name} History</h2>
+          {/* Your chart code here */}
+        </div>
+      </div>
+    )}
+  </div>
+);
   return  (
   <Router>
     <Toaster position="top-center" reverseOrder={false} />
