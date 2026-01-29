@@ -8,9 +8,9 @@ const User=require("./models/User")
 
 require('dotenv').config();
 
-
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+
 // In-memory database
 
 
@@ -229,7 +229,9 @@ app.post('/login', async (req, res) => {
 });
 
 
+const PORT = process.env.PORT || 5000;
+
 // 🚀 Start server
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log("Price Watcher API running on http://localhost:3000");
 });
