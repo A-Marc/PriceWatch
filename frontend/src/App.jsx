@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import AddProduct from "./components/addProductForm";
+
 import StatsSummary from "./components/statsSummary";
 // Change these to lowercase to match your actual files
 import Login from "./components/login"; 
