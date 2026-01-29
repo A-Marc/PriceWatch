@@ -193,19 +193,23 @@ app.put('/products/:id', auth, async (req, res) => {
 
 
 
-
-app.post("/signup",async(req,res)=>{
-  try{
-    const {name,email,password}=req.body;
-    const user=new User({name,email,password})
+app.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    console.log("Attempting signup for:", email); // Log the email to Render console
+    
+    const user = new User({ name, email, password });
     await user.save();
-    res.status(201).json({message:"user created successfully"})
-  }catch(error){
-    res.status(400).json({error:"email already existed or invalid data"})
+    
+    res.status(201).json({ message: "user created successfully" });
+  } catch (error) {
+    console.error("SIGNUP ERROR DETAILS:", error); // Check Render logs for this!
+    res.status(400).json({ 
+      error: "Signup failed", 
+      details: error.message // This will tell you if it's a validation or connection error
+    });
   }      
-})
-
-
+});
 app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
