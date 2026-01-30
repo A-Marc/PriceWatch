@@ -1,3 +1,5 @@
+const initPriceTracker = require('./jobs/priceTracker');
+
 const express = require('express');
 const app = express();
 const cors=require('cors')
@@ -123,51 +125,6 @@ app.put('/products/:id', auth, async (req, res) => {
     res.status(500).json({ message: "Failed to update product" });
   }
 });
-// // 🔵 PUT update product (price or other fields)
-// app.put('/products/:id', auth,async (req, res) => {
-//   const { id } = req.params;
-//   const { name, url, targetPrice, currentPrice } = req.body;
-
-//   try {
-//     const product = await Product.findById(id);
-//     if (!product) return res.status(404).json({ message: "Product not found" });
-
-//     // Update simple fields
-//     if (name) product.name = name;
-//     if (url) product.url = url;
-//     if (targetPrice) product.targetPrice = targetPrice;
-
-//     // Update price & history
-//     if (currentPrice && currentPrice > 0) {
-//       const oldPrice = product.currentPrice || 0;
-//       const newPrice = Number(currentPrice);
-
-//       if (oldPrice > 0) {
-//         const percentChange = ((newPrice - oldPrice) / oldPrice) * 100;
-//         const roundedChange = Math.round(percentChange * 10) / 10;
-
-//         product.history.push({
-//           oldPrice,
-//           newPrice,
-//           change: roundedChange,
-//           date: new Date()
-//         });
-
-//         product.change = roundedChange;
-//       }
-
-//       product.currentPrice = newPrice;
-//     }
-
-//     const updatedProduct = await product.save();
-//     res.json(updatedProduct);
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Failed to update product" });
-//   }
-// });
-
 
 // 🔴 DELETE remove product (Secure Version)
 app.delete('/products/:id', auth, async (req, res) => {
@@ -250,5 +207,8 @@ const PORT = process.env.PORT || 5000;
 
 // 🚀 Start server
 app.listen(PORT, () => {
-  console.log("Price Watcher API running on http://localhost:3000");
+  console.log(`Server running on port ${PORT}`);
+  
+  // Launch the tracker!
+  initPriceTracker(); 
 });
