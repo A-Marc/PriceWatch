@@ -32,6 +32,7 @@ return (
       <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 w-full md:w-auto">
         
         {/* Track Product Button - Sleek Gradient Style */}
+        {token &&
         <button 
           onClick={onAddProductClick}
           className="group relative flex items-center bg-slate-900 dark:bg-blue-600 text-white font-bold py-2 px-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all overflow-hidden"
@@ -45,6 +46,7 @@ return (
           {/* Hover Slide Effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </button>
+}
 
         {/* Toggle Dark Mode Button - Modern Minimalist */}
         <button
