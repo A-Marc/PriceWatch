@@ -6,7 +6,7 @@ import darklogo from '../assets/darklogo.jpg'
 
 function Navbar({ onAddProductClick, theme, toggleTheme, onLogout, token }) {
 return (
-    /* --- GLASSMORPHIC FLOATING NAV --- */
+    /* --- GLASSMORPHIC FLOATING NAV  NAV --- */
     <nav className="sticky top-0 z-[100] flex flex-col md:flex-row justify-between items-center p-3 md:p-4 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/20 dark:border-gray-800 transition-all duration-300 gap-4 shadow-sm">
       
       {/* LEFT SECTION: Logo and Title */}
