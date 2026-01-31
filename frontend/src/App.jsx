@@ -4,6 +4,8 @@ import Navbar from "./components/Navbar";
 import { Toaster } from 'react-hot-toast'; // 1. Import it
 import toast from 'react-hot-toast'
 
+
+
 import StatsSummary from "./components/statsSummary";
 // Change these to lowercase to match your actual files
 import Login from "./components/login"; 
@@ -14,6 +16,8 @@ import API from "./api";
 
 import axios from 'axios';
 
+
+import { Line } from "react-chartjs-2"; // <--- THIS WAS MISSING
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -25,7 +29,10 @@ import {
   Legend,
 } from "chart.js";
 
+// Register the components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -280,14 +287,110 @@ const Dashboard = () => (
       )}
     </div>
 
-    {selectedProduct && (
-      <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-2">
-        <div className="bg-white/90 backdrop-blur-2xl dark:bg-gray-800 dark:backdrop-blur-none p-6 rounded-2xl w-full max-w-lg relative overflow-auto max-h-[90vh] border dark:border-none">
-          <button className="absolute top-4 right-4 text-2xl dark:text-white" onClick={() => setSelectedProduct(null)}>✕</button>
-          <h2 className="text-2xl font-bold mb-5 dark:text-white text-center">{selectedProduct.name} History</h2>
+{selectedProduct && (
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] border border-white/10">
+      
+      {/* Header */}
+      <div className="p-6 pb-2 border-b border-gray-100 dark:border-gray-800">
+        <button 
+          className="absolute top-5 right-5 text-gray-400 hover:text-red-500 text-2xl transition-colors" 
+          onClick={() => setSelectedProduct(null)}
+        >
+          ✕
+        </button>
+        <h2 className="text-2xl font-bold dark:text-white pr-8">{selectedProduct.name}</h2>
+        <p className="text-sm text-blue-500 font-medium tracking-wide">Price Analytics & Logs</p>
+      </div>
+
+      <div className="p-6 overflow-y-auto custom-scrollbar">
+        {/* 1. THE GRAPH FIX: Mapping to newPrice and fixing Y-Axis */}
+        <div className="h-60 w-full bg-slate-50/50 dark:bg-gray-800/50 rounded-3xl p-4 mb-6">
+          {(() => {
+            const history = selectedProduct.history || [];
+            // FIX: Map to 'newPrice' because that is what your Schema uses
+            const chartData = history.map(h => h.newPrice || selectedProduct.currentPrice || 0);
+            const labels = history.map(h => 
+              new Date(h.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            );
+
+            return history.length > 0 ? (
+              <Line 
+                data={{
+                  labels: labels,
+                  datasets: [{
+                    label: 'Price',
+                    data: chartData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3b82f6',
+                  }]
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    y: { 
+                      beginAtZero: false, // Prevents the "flat line at bottom" look
+                      grace: '15%',       // Adds padding so the line isn't touching the top/bottom
+                      ticks: { 
+                        color: theme === 'dark' ? '#94a3b8' : '#64748b',
+                        callback: (val) => `$${val.toLocaleString()}` 
+                      },
+                      grid: { color: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+                    },
+                    x: { 
+                      ticks: { color: theme === 'dark' ? '#94a3b8' : '#64748b' },
+                      grid: { display: false }
+                    }
+                  },
+                  plugins: { legend: { display: false } }
+                }}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-2">
+                <span className="text-3xl">📉</span>
+                <p className="italic text-sm">No price logs found for this item.</p>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* 2. THE LOG LIST FIX: Mapping to newPrice */}
+        <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-4">History Logs</h3>
+        <div className="space-y-3">
+          {(() => {
+            const logs = [...(selectedProduct.history || [])].reverse();
+            return logs.map((log, index) => {
+              // FIX: Use newPrice to match your Mongoose Schema
+              const displayPrice = log.newPrice || selectedProduct.currentPrice || 0;
+              
+              return (
+                <div key={index} className="flex justify-between items-center p-4 bg-white dark:bg-gray-800/40 rounded-2xl border border-slate-100 dark:border-gray-700/50 shadow-sm">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-400 uppercase font-black tracking-tighter">Recorded At</span>
+                    <span className="text-sm dark:text-gray-200 font-semibold">
+                      {new Date(log.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-gray-400 uppercase font-black tracking-tighter">Price</span>
+                    <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                      ${Number(displayPrice).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              );
+            });
+          })()}
         </div>
       </div>
-    )}
+    </div>
+  </div>
+)}
   </div>
 );
   return  (
