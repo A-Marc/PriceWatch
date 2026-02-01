@@ -43,10 +43,22 @@ Price Watch is a full-stack web app that helps users **track product prices**, v
 - Nodemailer (email notifier)
 
 ---
-
 ## 🚀 Getting Started
 
-### 1) Clone the repository
+### 1) Clone the repository and install dependencies
 ```bash
+# Clone the repo
 git clone <your-repo-link>
 cd <your-project-folder>
+
+# -----------------------------
+# Frontend setup
+cd frontend
+npm install
+npm run dev
+
+# -----------------------------
+# Backend setup
+cd ../backend
+npm install
+npm start
