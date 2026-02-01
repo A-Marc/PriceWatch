@@ -167,25 +167,33 @@ function App() {
           </div>
         )}
 
-        <div className="w-full max-w-3xl mx-auto mt-8 space-y-6 px-4 pb-20">
-          <StatsSummary totalItems={products.length} avgChange={avgChange} />
-          
-          {loading ? (
-            <LoadingSkeleton />
-          ) : products.length > 0 ? (
-            products.map((product) => (
-              <ProductCard 
-                key={product._id} 
-                product={product} 
-                onViewHistory={setSelectedProduct}
-                onEdit={(p) => { setEditingProduct(p); setShowForm(true); }}
-                onDelete={setItemToDelete}
-              />
-            ))
-          ) : (
-            <FirstItemCTA onAddClick={() => setShowForm(true)} />
-          )}
-        </div>
+    <div className="w-full max-w-3xl mx-auto mt-8 space-y-6 px-4 pb-20">
+  <StatsSummary totalItems={products.length} avgChange={avgChange} />
+  
+  {loading ? (
+    <LoadingSkeleton />
+  ) : products.length > 0 ? (
+    // 1. Show the products if they exist
+    products.map((product) => (
+      <ProductCard 
+        key={product._id} 
+        product={product} 
+        onViewHistory={setSelectedProduct}
+        onEdit={(p) => { setEditingProduct(p); setShowForm(true); }}
+        onDelete={setItemToDelete}
+      />
+    ))
+  ) : token ? (
+    // 2. Logged in but no products yet
+    <FirstItemCTA onAddClick={() => setShowForm(true)} />
+  ) : (
+    // 3. Not logged in -> SHOW THE HERO SECTION
+    <EmptyState 
+      onSignup={() => navigate("/signup")} 
+      onLogin={() => navigate("/login")} 
+    />
+  )}
+</div>
 
         {selectedProduct && ( 
           <PriceHistoryModal 
