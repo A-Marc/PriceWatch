@@ -9,6 +9,9 @@ import Login from "./components/login";
 import Signup from "./components/signup";
 import AddProduct from "./components/addProductForm"; 
 
+import PriceHistoryModal from "./components/dashboard/PriceHistoryModal";
+import DeleteModal from "./components/dashboard/DeleteModal";
+
 import API from "./api";
 import axios from 'axios';
 
@@ -218,32 +221,11 @@ const executeDelete = async () => {
         />
 
         {/* DELETE CONFIRMATION MODAL */}
-        {itemToDelete && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[60] p-4">
-            <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-white/20 text-center animate-in fade-in zoom-in duration-200">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                ⚠️
-              </div>
-              <h3 className="text-xl font-black dark:text-white mb-2">Are you sure?</h3>
-              <p className="text-slate-500 dark:text-gray-400 text-sm mb-8">
-                This item will be removed from your tracking list. You can't undo this action.
-              </p>
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setItemToDelete(null)}
-                  className="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-xl transition-all"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={executeDelete}
-                  className="flex-1 py-3 font-bold bg-red-600 text-white rounded-xl hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
+        {itemToDelete && (<DeleteModal 
+  isOpen={!!itemToDelete} 
+  onCancel={() => setItemToDelete(null)} 
+  onConfirm={executeDelete} 
+/>
         )}
 
         {showForm && (
@@ -411,136 +393,11 @@ const executeDelete = async () => {
           )}
         </div>
 
-       {selectedProduct && (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[70] p-4">
-    {/* Max height set to 85vh to ensure it never touches the screen edges */}
-    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh] border border-white/10 animate-in fade-in zoom-in duration-200">
-      
-      {/* 1. STICKY HEADER - shrink-0 prevents it from disappearing */}
-      <div className="p-6 pb-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
-        <button 
-          className="absolute top-6 right-6 text-gray-400 hover:text-red-500 text-2xl transition-colors z-50" 
-          onClick={() => setSelectedProduct(null)}
-        >
-          ✕
-        </button>
-        <h2 className="text-xl font-black dark:text-white pr-10 truncate">
-          {selectedProduct.name}
-        </h2>
-        <p className="text-xs text-blue-500 font-bold uppercase tracking-widest mt-1">
-          Price Analytics & History
-        </p>
-      </div>
-
-      {/* 2. SCROLLABLE CONTENT - This is the only part that scrolls */}
-      <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-        
-      {/* GRAPH CONTAINER */}
-<div className="h-56 w-full bg-slate-50/50 dark:bg-gray-800/50 rounded-3xl p-4 mb-6 border border-slate-100 dark:border-gray-800/50 flex-shrink-0">
-  {(() => {
-    const history = selectedProduct.history || [];
-    
-    // 1. Create the Starting Point (Price when added)
-    const initialPoint = {
-      price: selectedProduct.initialPrice || selectedProduct.currentPrice,
-      date: selectedProduct.createdAt || new Date()
-    };
-
-    // 2. Combine Starting Point + History Updates
-    const chartPrices = [
-      initialPoint.price, 
-      ...history.map(h => h.newPrice)
-    ];
-
-    const chartLabels = [
-      "Added", 
-      ...history.map(h => new Date(h.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-    ];
-
-    return (
-      <Line 
-        data={{
-          labels: chartLabels,
-          datasets: [{ 
-            label: 'Price', 
-            data: chartPrices, 
-            borderColor: '#3b82f6', 
-            backgroundColor: 'rgba(59, 130, 246, 0.1)', 
-            fill: true, 
-            tension: 0.4, 
-            pointRadius: chartPrices.length > 1 ? 4 : 6, // Larger point if it's the only one
-            pointBackgroundColor: '#3b82f6' 
-          }]
-        }}
-        options={{ 
-          responsive: true, 
-          maintainAspectRatio: false, 
-          scales: { 
-            y: { 
-              beginAtZero: false, 
-              grace: '15%', 
-              ticks: { 
-                color: theme === 'dark' ? '#94a3b8' : '#64748b', 
-                callback: (val) => `$${val.toLocaleString()}` 
-              },
-              grid: { color: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } 
-            }, 
-            x: { 
-              ticks: { color: theme === 'dark' ? '#94a3b8' : '#64748b' }, 
-              grid: { display: false } 
-            } 
-          }, 
-          plugins: { 
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (context) => `Price: $${context.parsed.y}`
-              }
-            }
-          } 
-        }}
-      />
-    );
-  })()}
-</div>
-
-        {/* HISTORY LOGS TITLE */}
-        <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-4 sticky top-0 bg-white dark:bg-gray-900 py-1">
-          Activity Logs
-        </h3>
-
-        {/* LOGS LIST */}
-        <div className="space-y-3">
-          {[...(selectedProduct.history || [])].reverse().map((log, index) => (
-            <div key={index} className="flex justify-between items-center p-4 bg-white dark:bg-gray-800/40 rounded-2xl border border-slate-100 dark:border-gray-700/50 shadow-sm transition-all hover:border-blue-500/30">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-gray-400 uppercase font-black tracking-tighter">Recorded At</span>
-                <span className="text-sm dark:text-gray-200 font-semibold">
-                  {new Date(log.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] text-gray-400 uppercase font-black tracking-tighter">Price</span>
-                <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                  ${Number(log.newPrice || selectedProduct.currentPrice).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 3. OPTIONAL FOOTER - Keeps the modal visually balanced */}
-      <div className="p-4 bg-slate-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex-shrink-0 text-center">
-        <button 
-          onClick={() => setSelectedProduct(null)}
-          className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors"
-        >
-          Close Dashboard
-        </button>
-      </div>
-    </div>
-  </div>
+       {selectedProduct && ( <PriceHistoryModal 
+  product={selectedProduct} 
+  theme={theme} 
+  onClose={() => setSelectedProduct(null)} 
+/>
 )}
       </div>
     );
