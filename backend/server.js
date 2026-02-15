@@ -14,9 +14,6 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 
-// In-memory database
-
-
 
 
 // Connect to MongoDB
@@ -38,7 +35,7 @@ const auth = (req, res, next) => {
     res.status(401).json({ message: "Access denied. Please log in." });
   }
 };
-// 🟢 GET all products
+
 // 🟢 GET all products
 app.get('/products', auth, async (req, res) => {
   try {
@@ -52,8 +49,6 @@ app.get('/products', auth, async (req, res) => {
 
 
 
-
-// 🟡 POST add new product
 // 🟡 POST add new product
 app.post('/products', auth,async (req, res) => {
   const { name, url, targetPrice, currentPrice } = req.body;
@@ -183,12 +178,6 @@ app.post('/login', async (req, res) => {
     // 1. Find user by email
     const user = await User.findOne({ email: email.toLowerCase() }); // Added .toLowerCase() for safety
     if (!user) return res.status(404).json({ message: "User not found" });
-
-    // --- DEBUG LOGS START ---
-    console.log("DEBUG: Login attempt for:", email);
-    console.log("DEBUG: Password from frontend:", password);
-    console.log("DEBUG: Hashed password in DB:", user.password);
-    // --- DEBUG LOGS END ---
 
     // 2. Check if password is correct
     const isMatch = await user.comparePassword(password);

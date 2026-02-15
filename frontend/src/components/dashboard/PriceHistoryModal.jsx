@@ -5,9 +5,7 @@ const PriceHistoryModal = ({ product, theme, onClose }) => {
   if (!product) return null;
 
   return (
-    /* 1. Higher Z-INDEX: Set to z-[150] to definitely sit above your Navbar (which is z-[100]) */
-    /* 2. Changed items-start and added pt-20 for mobile: This ensures it starts below the navbar area if it overflows */
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-start sm:items-center z-[150] p-2 sm:p-4 overflow-y-auto pt-20 sm:pt-4">
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-start sm:items-center z-[150] p-2 sm:p-4 overflow-y-auto pt-20 sm:pt-4">
       
       {/* Container Logic */}
       <div className="bg-white dark:bg-gray-900 rounded-[1.5rem] sm:rounded-[2.5rem] w-full max-w-lg shadow-2xl relative my-auto overflow-hidden flex flex-col max-h-[80vh] sm:max-h-[85vh] border border-white/10 animate-in fade-in zoom-in duration-200">

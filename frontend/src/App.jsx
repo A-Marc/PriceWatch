@@ -66,7 +66,7 @@ function App() {
     if (!token) return setLoading(false);
     setLoading(true);
     try {
-      // Consistency: Use API instance instead of raw axios
+      
       const res = await API.get("/products");
       setProducts(res.data);
     } catch (err) {

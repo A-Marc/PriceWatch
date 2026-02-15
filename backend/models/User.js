@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs"); // You'll need to run: npm install bcryptjs
+const bcrypt = require("bcryptjs"); 
 
 const UserSchema = new mongoose.Schema({
   name: { 
@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 // 🔥 ENCRYPTION: This runs automatically before saving a user
-// 🔥 ENCRYPTION: Simplified version
+
 UserSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   

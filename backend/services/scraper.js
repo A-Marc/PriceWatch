@@ -19,7 +19,7 @@ async function scrapePrice(url) {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     // 1. PRIORITY SELECTORS: These target the MAIN listing price only.
-    // eBay uses data-testid="x-price-primary" for the actual item price.
+
     const prioritySelectors = [
       'div[data-testid="x-price-primary"]', 
       '#prcIsum',                           
@@ -38,7 +38,7 @@ async function scrapePrice(url) {
           break;
         }
       } catch (e) {
-        continue; // Try the next one if this fails
+        continue; 
       }
     }
 
