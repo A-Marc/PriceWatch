@@ -1,5 +1,5 @@
 
-# 📌 Price Watch — Price Tracker App
+# 📌 Price Watch — Price Tracker App Marc
 
 ![React](https://img.shields.io/badge/React-Frontend-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-Backend-green)
